@@ -26,8 +26,9 @@ def extract_hog_features(image):
 
 def predict_image_HOG(image, classifier, hog_pca_transformer):
     predict_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = detect_face(predict_image)
     # Verkleinere das Bild
-    predict_resized_image = cv2.resize(predict_image, (255, 255))
+    predict_resized_image = cv2.resize(image, (255, 255))
     # Extrahiere die HOG-Merkmale
     hog_features = extract_hog_features(predict_resized_image)
     hog_features_pca = hog_pca_transformer.transform(hog_features.reshape(1, -1))
@@ -39,11 +40,10 @@ def predict_image_HOG(image, classifier, hog_pca_transformer):
     return predicted_class_name, confidence
 
     
-def detect_face(image_path):
+def detect_face(image):
     # Laden des Gesichtserkennungs-Klassifikators (Haar-Cascade)
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     # Laden des Bildes
-    image = cv2.imread(image_path)
     if image is not None:
         # Konvertieren des Bildes in Graustufen
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -58,10 +58,10 @@ def detect_face(image_path):
             ##cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
             return face
         else:
-            print(f"No face detected in {image_path}")
+            print(f"No face detected ")
             return None
     else:
-        print(f"Failed to load image: {image_path}")
+        print(f"Failed to load image")
         return None
 
 

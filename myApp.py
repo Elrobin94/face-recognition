@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 import sys
 from face_recognition_Cam import predict_image_HOG
+import cv2
 
 
 # Laden der trainierten Modelle und Transformer
@@ -26,30 +27,27 @@ def main():
 
     # Option zur Auswahl des Kamera-Modus oder Datei-Upload
     camera_mode = st.sidebar.checkbox("Kamera-Modus", True)
-    if camera_mode:
         # Hier können Sie die Kamera steuern und ein Bild aufnehmen
-        st.write("Kamera wird aktiviert...")
-        if st.button("Bild aufnehmen"):
-            # capture_image_from_camera()  # Beispielcode, um ein Bild von der Kamera aufzunehmen
-            # Hier wird das aufgenommene Bild angezeigt
-            # image = captured_image
-            # st.image(image, caption="Captured Image", use_column_width=True)
-            st.warning("Kamera-Modus ist noch nicht implementiert.")
-            return
+    st.write("Kamera wird aktiviert...")
+    # Öffnen Sie die Kamera
+    cap = cv2.VideoCapture(0)
+    if st.button("Bild aufnehmen"):
+        ret, frame = cap.read()
+        if ret:
+            # Bild anzeigen
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            image = Image.fromarray(frame_bgr)
+            st.image(image, caption="Captured Image", use_column_width=True) 
         else:
-            st.warning("Bitte klicken Sie auf 'Bild aufnehmen', um ein Bild aufzunehmen.")
+            st.warning("Fehler beim Aufnehmen des Bildes.")
             return
     else:
-        uploaded_image = st.sidebar.file_uploader("Bild hochladen", type=["jpg", "jpeg", "png"])
-        if uploaded_image is not None:
-            # Bild anzeigen
-            image = Image.open(uploaded_image)
-            st.image(image, caption="Uploaded Image", use_column_width=True)
-        else:
-            st.warning("Bitte laden Sie ein Bild hoch oder aktivieren Sie den Kamera-Modus.")
-            return
+        st.warning("Bitte klicken Sie auf 'Bild aufnehmen', um ein Bild aufzunehmen.")
+        return
+    
 
     # Vorhersage auf dem Bild durchführen
+    image = np.array(image)
     prediction, confidence = predict_on_image(image, rf_classifier_hog, hog_pca_transformer)
     
     # Vorhersageergebnis anzeigen
