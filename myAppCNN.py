@@ -13,8 +13,8 @@ from keras.optimizers import Adam
 from keras.metrics import categorical_crossentropy
 from keras.preprocessing.image import ImageDataGenerator
 
-# Laden der trainierten Modelle
-loaded_model = keras.models.load_model("E:/ZHAW/Semester4/Project/face-recognition/mein_keras_modell.h5")
+# Laden des trainierten Modells
+loaded_model = keras.models.load_model("D:/ZHAW/3.Semester/face-recognition/mein_keras_modell.h5")
 
 # Funktion zur Erkennung von Gesichtern in Bildern
 def detect_face(image):
@@ -36,6 +36,12 @@ def detect_face(image):
         st.warning("Kein Gesicht erkannt.")
         return None
 
+# VGG16-Preprocessing-Funktion
+def vgg16_preprocess(image):
+    # Skalierung der Pixelwerte auf den Bereich [-1, 1] und Subtraktion des Mittelwerts
+    image = np.array(image.resize((224, 224)))
+    return preprocess_input(image)
+
 # Streamlit App
 def main():
     st.title("Face Recognition App")
@@ -53,10 +59,12 @@ def main():
             # Gesichter im Bild erkennen
             detected_face = detect_face(frame)
             if detected_face is not None:
+                # VGG16-Preprocessing auf dem Bild anwenden
+                image_preprocessed = vgg16_preprocess(detected_face)
                 # Vorhersage auf dem Gesicht durchführen
-                image_preprocessed = preprocess_input(np.array(detected_face.resize((224, 224))))
-                image_batch = np.expand_dims(image_preprocessed, axis=0)
-                predictions = loaded_model.predict(image_batch)
+																								 
+                predictions = loaded_model.predict(np.expand_dims(image_preprocessed, axis=0))
+															   
                 
                 if predictions is not None:
                     class_names = ['robin', 'nino']
